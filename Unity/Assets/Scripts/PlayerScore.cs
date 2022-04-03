@@ -1,6 +1,6 @@
 ﻿using TMPro;
+using System.Collections;
 using UnityEngine;
-//using static Autogatherer;
 
 namespace clicker
 {
@@ -12,38 +12,38 @@ namespace clicker
         [SerializeField] private TMP_Text _clickStatus;
         [SerializeField] private TMP_Text _autoGLevel;
         [SerializeField] private TMP_Text _autoGStatus;
-        private int _clickLvl = 0;
-        private int _autoGLvl;
-        private int _score;
+        
+        public GameObject _loadErrorText;
+        
+        public int _clickLvl = 0;
+        public int _autoGLvl;
+        public int _score;
         private int _clickGain;
         private int _autoGGAin = 0;
         private int _cost = 20;
-        private float _gathering = 5.0f;
-        private float _time = 0.0f;
 
+        //Set up everthing
         private void OnEnable()
         {
             _scoreDisplay.SetText(_score.ToString());
             _clickLevel.SetText("lvl." + _clickLvl.ToString());
             _clickGain = (int)Mathf.Round(Mathf.Pow(2, _clickLvl));
             _clickStatus.SetText(_clickGain.ToString()+" per click");
-            InvokeRepeating("Gathering", 5, 5);
-            InvokeRepeating("Test", 5, 5);
+            
+            InvokeRepeating("Gathering", 5, 5); //Gather ressources every 5 seconds
         }
 
-        void start()
-        {
-
-        }
-
+        //Increase the score by the actual gain per click
         public void IncreaseScore()
         {
             _score+= _clickGain;
             _scoreDisplay.SetText(_score.ToString());
         }
 
+        //Level up the click
         public void LevelUp()
-        {
+        {      
+            //check ressources
             if (_score < 20)
             {
                 _upgradeError.SetText("Missing ressources");
@@ -52,10 +52,11 @@ namespace clicker
 
             _score -= _cost;
             _clickLvl++;
-            _clickGain = (int)Mathf.Round(Mathf.Pow(2, _clickLvl));
-            UpdateUI();
+            _clickGain = (int)Mathf.Round(Mathf.Pow(2, _clickLvl)); //update gain per click
+            UpdateUI(); //update all the UI
         }
 
+        //Update all the UI thus no outdated text
         private void UpdateUI()
         {
             _upgradeError.SetText("");
@@ -66,9 +67,9 @@ namespace clicker
             _autoGStatus.SetText(_autoGGAin.ToString() + " per 5 sec");
         }
 
+        //Level up auto-gathering
         public void AutoGLevelUp()
         {
-
             if (_score < 20)
             {
                 _upgradeError.SetText("Missing ressources");
@@ -82,28 +83,34 @@ namespace clicker
 
         }
 
-        public void Test()
-        {
-            Debug.Log("coucou");
-        }
-
+        //Gather ressources
         public void Gathering()
         {
             _score += _autoGGAin;
             UpdateUI();
         }
 
-       /* void update()
-        {
-            _time = Time.deltaTime;
-
-            if(_time > _gathering)
-            {
-                gathering();
+        //Take Input data and load it as it is the actual value for the game main variables. Used to load a game.
+        public void Load(int score, int clvl, int aglvl){
+            if(score == -1){
+                StartCoroutine(LoadErrorDisplay());
+                return;
             }
-        }*/
-    
-    
+            _score = score;
+            _clickLvl = clvl;
+            _autoGLvl = aglvl;
+            _clickGain = (int)Mathf.Round(Mathf.Pow(2, _clickLvl));
+            _autoGGAin = ((int)Mathf.Round(Mathf.Pow(2, _autoGLvl))) / 2;
+            UpdateUI();
+
+        }
+
+        //Display a message if no save was found. the message last 5 second
+        IEnumerator LoadErrorDisplay(){
+            _loadErrorText.SetActive(true);
+            yield return new WaitForSeconds(5f);
+            _loadErrorText.SetActive(false);            
+        }
     }
 
 

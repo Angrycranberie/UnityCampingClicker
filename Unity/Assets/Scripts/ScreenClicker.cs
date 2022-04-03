@@ -9,22 +9,27 @@ namespace clicker
         [SerializeField] private LayerMask _layerMask;
         [SerializeField] private float _maxDistance = 10f;
         [SerializeField] private UnityEvent _onClickSuccess;
-        [SerializeField] private UnityEvent _goByouKeika; //subtil Jojo reference
+        public GameObject _tent;
 
-        private float _time = 0.0f;
-        private float _go = 5.0f;
         private RaycastHit[] _hits;
 
         protected void Awake()
         {
             _hits = new RaycastHit[1];
+            
+        }
+
+        //Tent annimation that occurs every click
+        private void TentAnimation(){
+            _tent = GameObject.Find("tent");
+            Animator animator = _tent.GetComponent<Animator>();
+                if(animator != null){
+                    animator.SetTrigger("clicked");
+                }
         }
 
         protected void Update()
         {
-            //InvokeRepeating("_goByoukeika", 5.0f, 5.0f);
-           /* _time = Time.deltaTime;
-            if (_time >= _go) { _goByouKeika?.Invoke(); }*/
 
             if (!Input.GetMouseButtonDown(0))
             {
@@ -34,6 +39,7 @@ namespace clicker
             int hitsAmount = Physics.RaycastNonAlloc(ray, _hits, _maxDistance, _layerMask.value);
             if (hitsAmount > 0)
             {
+                TentAnimation();
                 _onClickSuccess?.Invoke();
             }
         }
